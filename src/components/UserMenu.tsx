@@ -40,6 +40,12 @@ export const UserMenu = () => {
             <span>Сохраненные сигналы</span>
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/settings" className="flex w-full cursor-pointer items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>Настройки</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut} className="text-destructive">
           <LogOut className="mr-2 h-4 w-4" />

@@ -9,6 +9,50 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      email_notification_settings: {
+        Row: {
+          created_at: string
+          daily_digest_enabled: boolean | null
+          daily_digest_time: string | null
+          email: string
+          id: string
+          is_enabled: boolean | null
+          notify_on_strong_only: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_digest_enabled?: boolean | null
+          daily_digest_time?: string | null
+          email: string
+          id?: string
+          is_enabled?: boolean | null
+          notify_on_strong_only?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_digest_enabled?: boolean | null
+          daily_digest_time?: string | null
+          email?: string
+          id?: string
+          is_enabled?: boolean | null
+          notify_on_strong_only?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_signals: {
         Row: {
           created_at: string
@@ -51,6 +95,47 @@ export type Database = {
             foreignKeyName: "saved_signals_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_signal_settings: {
+        Row: {
+          created_at: string
+          id: string
+          min_strength: string | null
+          signal_types: string[] | null
+          symbols: string[] | null
+          timeframes: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_strength?: string | null
+          signal_types?: string[] | null
+          symbols?: string[] | null
+          timeframes?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_strength?: string | null
+          signal_types?: string[] | null
+          symbols?: string[] | null
+          timeframes?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_signal_settings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
