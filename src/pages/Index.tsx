@@ -5,6 +5,8 @@ import { MarketTicker } from "@/components/MarketTicker";
 import { WebSocketStatus } from "@/components/WebSocketStatus";
 import { SignalsList } from "@/components/SignalsList";
 import { OpenInterestTable } from "@/components/OpenInterestTable";
+import { UserMenu } from "@/components/UserMenu";
+import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
 const Index = () => {
@@ -20,7 +22,10 @@ const Index = () => {
           <div className="container">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <h1 className="text-2xl font-bold text-primary">Bybit Signal Sniper</h1>
-              <WebSocketStatus />
+              <div className="flex items-center gap-4">
+                <WebSocketStatus />
+                <UserMenu />
+              </div>
             </div>
           </div>
         </header>

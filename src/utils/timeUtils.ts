@@ -38,3 +38,22 @@ export const formatMoscowDateTime = (timestamp: number): string => {
 export const getCurrentMoscowTime = (): string => {
   return toMoscowTime(Date.now());
 };
+
+// Format time based on user's timezone
+export const formatUserLocalTime = (timezone?: string): string => {
+  const date = new Date();
+  
+  // Use the user's timezone or fallback to browser's timezone
+  const userTimezone = timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  // Create a formatter for the user's local time
+  const formatter = new Intl.DateTimeFormat('ru-RU', {
+    timeZone: userTimezone,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  
+  return formatter.format(date);
+};
