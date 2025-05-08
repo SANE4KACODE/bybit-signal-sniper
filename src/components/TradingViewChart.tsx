@@ -68,7 +68,13 @@ const TradingViewChart = ({
         'MACD@tv-basicstudies',
         'StochasticRSI@tv-basicstudies',
         'AwesomeOscillator@tv-basicstudies',
-        'BollingerBands@tv-basicstudies'
+        'BollingerBands@tv-basicstudies',
+        'BB@tv-basicstudies',
+        'VWAP@tv-basicstudies',
+        'Volume@tv-basicstudies',
+        'DMI@tv-basicstudies',
+        'ADX@tv-basicstudies',
+        'PivotPointsStandard@tv-basicstudies'
       ],
       height: height,
       autosize: autosize,
@@ -76,10 +82,22 @@ const TradingViewChart = ({
     });
   };
   
+  const getBackgroundClass = () => {
+    if (theme === 'colorful') return 'bg-gradient-to-br from-trading-card to-indigo-900';
+    if (theme === 'light') return 'bg-gray-100';
+    return 'bg-trading-card';
+  };
+
+  const getTitleClass = () => {
+    if (theme === 'colorful') return 'text-gradient-primary';
+    if (theme === 'light') return 'text-gray-800';
+    return 'text-foreground';
+  };
+  
   return (
-    <Card className={`bg-trading-card border-trading-highlight ${theme === 'colorful' ? 'bg-gradient-to-br from-trading-card to-indigo-900' : ''}`}>
+    <Card className={`${getBackgroundClass()} border-trading-highlight`}>
       <CardHeader className="px-4 py-2">
-        <CardTitle className={`text-base font-medium ${theme === 'colorful' ? 'text-gradient-primary' : ''}`}>
+        <CardTitle className={`text-base font-medium ${getTitleClass()}`}>
           {symbol} График
         </CardTitle>
       </CardHeader>

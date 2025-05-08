@@ -19,7 +19,20 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     psar,
     mfi,
     cci,
-    williamsr
+    williamsr,
+    vwap,
+    supertrend,
+    dmi,
+    keltnerChannels,
+    aroon,
+    zigzag,
+    donchianChannels,
+    fibonacciRetracement,
+    volumeProfile,
+    cumulativeDeltaVolume,
+    forceIndex,
+    moneyFlowIndex,
+    trix
   } = signal.indicators;
   
   // Count confirming indicators
@@ -168,10 +181,117 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
+  // VWAP (Volume-Weighted Average Price) analysis
+  if (vwap && signal.price) {
+    if ((signal.signalType === 'LONG' && signal.price > vwap.value) ||
+        (signal.signalType === 'SHORT' && signal.price < vwap.value)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Supertrend analysis
+  if (supertrend) {
+    if ((signal.signalType === 'LONG' && supertrend.trend === 'UP') ||
+        (signal.signalType === 'SHORT' && supertrend.trend === 'DOWN')) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // DMI (Directional Movement Index) analysis 
+  if (dmi) {
+    if ((signal.signalType === 'LONG' && dmi.plusDI > dmi.minusDI && dmi.adx > 20) ||
+        (signal.signalType === 'SHORT' && dmi.plusDI < dmi.minusDI && dmi.adx > 20)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Keltner Channels analysis
+  if (keltnerChannels && signal.price) {
+    if ((signal.signalType === 'LONG' && signal.price < keltnerChannels.lower) ||
+        (signal.signalType === 'SHORT' && signal.price > keltnerChannels.upper)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Aroon analysis
+  if (aroon) {
+    if ((signal.signalType === 'LONG' && aroon.up > 70 && aroon.down < 30) ||
+        (signal.signalType === 'SHORT' && aroon.up < 30 && aroon.down > 70)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // ZigZag analysis
+  if (zigzag && zigzag.trend) {
+    if ((signal.signalType === 'LONG' && zigzag.trend === 'UP') ||
+        (signal.signalType === 'SHORT' && zigzag.trend === 'DOWN')) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Donchian Channels analysis
+  if (donchianChannels && signal.price) {
+    if ((signal.signalType === 'LONG' && signal.price === donchianChannels.upper) ||
+        (signal.signalType === 'SHORT' && signal.price === donchianChannels.lower)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Fibonacci Retracement analysis
+  if (fibonacciRetracement && signal.price) {
+    if (signal.signalType === 'LONG' && 
+        (signal.price >= fibonacciRetracement.level_0_382 && signal.price <= fibonacciRetracement.level_0_618)) {
+      confirmingFactors += 1;
+    } else if (signal.signalType === 'SHORT' && 
+              (signal.price >= fibonacciRetracement.level_0_618 && signal.price <= fibonacciRetracement.level_0_764)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Volume Profile analysis
+  if (volumeProfile && volumeProfile.valueArea) {
+    if ((signal.signalType === 'LONG' && signal.price && signal.price < volumeProfile.valueArea.low) ||
+        (signal.signalType === 'SHORT' && signal.price && signal.price > volumeProfile.valueArea.high)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Cumulative Delta Volume analysis
+  if (cumulativeDeltaVolume) {
+    if ((signal.signalType === 'LONG' && cumulativeDeltaVolume.value > 0 && cumulativeDeltaVolume.trendStrength > 70) ||
+        (signal.signalType === 'SHORT' && cumulativeDeltaVolume.value < 0 && cumulativeDeltaVolume.trendStrength > 70)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Force Index analysis
+  if (forceIndex) {
+    if ((signal.signalType === 'LONG' && forceIndex.value > 0) ||
+        (signal.signalType === 'SHORT' && forceIndex.value < 0)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // Money Flow Index analysis (again, separate from MFI above)
+  if (moneyFlowIndex) {
+    if ((signal.signalType === 'LONG' && moneyFlowIndex.value < 20) ||
+        (signal.signalType === 'SHORT' && moneyFlowIndex.value > 80)) {
+      confirmingFactors += 1;
+    }
+  }
+  
+  // TRIX analysis
+  if (trix) {
+    if ((signal.signalType === 'LONG' && trix.value > trix.signal) ||
+        (signal.signalType === 'SHORT' && trix.value < trix.signal)) {
+      confirmingFactors += 1;
+    }
+  }
+  
   // Determine strength based on confirming factors
-  // With many more indicators, we adjust the thresholds
-  if (confirmingFactors >= 10) return 'STRONG';
-  if (confirmingFactors >= 6) return 'MODERATE';
+  // With 20+ indicators, we adjust the thresholds
+  if (confirmingFactors >= 15) return 'STRONG';
+  if (confirmingFactors >= 10) return 'MODERATE';
   return 'WEAK';
 };
 
@@ -223,10 +343,10 @@ export const getStrengthIndicator = (strength: SignalStrength): string => {
 export const getStrengthDescription = (strength: SignalStrength): string => {
   switch (strength) {
     case 'STRONG':
-      return 'Подтвержден 10+ индикаторами';
+      return 'Подтвержден 15+ индикаторами';
     case 'MODERATE':
-      return 'Подтвержден 6-9 индикаторами';
+      return 'Подтвержден 10-14 индикаторами';
     case 'WEAK':
-      return 'Подтвержден 3-5 индикаторами';
+      return 'Подтвержден 5-9 индикаторами';
   }
 };

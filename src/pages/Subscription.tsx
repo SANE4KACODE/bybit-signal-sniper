@@ -77,11 +77,11 @@ const Subscription = () => {
                     <ul className="space-y-2">
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                        <span>Высокоточные сигналы с использованием 10+ индикаторов</span>
+                        <span>Высокоточные сигналы с использованием 20+ индикаторов</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                        <span>Интеграция с TradingView и Coinglass</span>
+                        <span>Полная интеграция с TradingView и Coinglass</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
@@ -89,7 +89,7 @@ const Subscription = () => {
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                        <span>Все монеты и все таймфреймы</span>
+                        <span>Все монеты (≈500) и все таймфреймы</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
@@ -147,19 +147,19 @@ const Subscription = () => {
                     <ul className="space-y-2">
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        <span>Высокоточные сигналы с использованием 10+ индикаторов</span>
+                        <span>Высокоточные сигналы с использованием 20+ индикаторов</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        <span>Интеграция с TradingView и Coinglass</span>
+                        <span>Полная интеграция с TradingView и все функции Coinglass</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        <span>Подключение аккаунта Bybit</span>
+                        <span>Подключение аккаунта Bybit и отслеживание позиций</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        <span>Все монеты и все таймфреймы</span>
+                        <span>Все монеты (≈500) и все таймфреймы</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />

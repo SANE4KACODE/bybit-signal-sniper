@@ -72,6 +72,80 @@ export interface Signal {
     mfi?: number;
     cci?: number;
     williamsr?: number;
+    vwap?: {
+      value: number;
+      deviation?: number;
+    };
+    supertrend?: {
+      value: number;
+      trend: 'UP' | 'DOWN';
+      multiplier: number;
+      period: number;
+    };
+    dmi?: {
+      plusDI: number;
+      minusDI: number;
+      adx: number;
+    };
+    keltnerChannels?: {
+      upper: number;
+      middle: number;
+      lower: number;
+      bandwidth: number;
+    };
+    aroon?: {
+      up: number;
+      down: number;
+      oscillator: number;
+    };
+    zigzag?: {
+      value: number;
+      trend: 'UP' | 'DOWN' | 'NEUTRAL';
+      pivots: number[];
+    };
+    donchianChannels?: {
+      upper: number;
+      middle: number;
+      lower: number;
+      width: number;
+    };
+    fibonacciRetracement?: {
+      level_0: number;
+      level_0_236: number;
+      level_0_382: number;
+      level_0_5: number;
+      level_0_618: number;
+      level_0_764: number;
+      level_1: number;
+    };
+    volumeProfile?: {
+      poc: number;  // Point of Control
+      valueArea: {
+        high: number;
+        low: number;
+      };
+      volumes: Record<number, number>;
+    };
+    cumulativeDeltaVolume?: {
+      value: number;
+      trendStrength: number;
+    };
+    forceIndex?: {
+      value: number;
+      ema: number;
+    };
+    moneyFlowIndex?: {
+      value: number;
+      threshold: {
+        overbought: number;
+        oversold: number;
+      }
+    };
+    trix?: {
+      value: number;
+      signal: number;
+      histogram: number;
+    };
   };
 }
 

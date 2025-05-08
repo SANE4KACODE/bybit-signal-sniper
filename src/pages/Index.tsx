@@ -14,13 +14,19 @@ import CoinglassWidget from "@/components/CoinglassWidget";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Crown } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
   const { isPremium } = useAuth();
   const [themeStyle, setThemeStyle] = useState<'dark' | 'light' | 'colorful'>('dark');
   const [selectedPair, setSelectedPair] = useState('BTCUSDT');
-  const popularPairs = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'AVAXUSDT'];
+  
+  // Expanded list of popular pairs
+  const popularPairs = [
+    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'AVAXUSDT', 
+    'DOGEUSDT', 'ADAUSDT', 'LTCUSDT', 'DOTUSDT', 'MATICUSDT', 'SHIBUSDT', 
+    'LINKUSDT', 'TRXUSDT', 'ATOMUSDT', 'UNIUSDT', 'ETCUSDT', 'FILUSDT', 
+    'NEARUSDT', 'APTUSDT'
+  ];
 
   // Set title
   useEffect(() => {
@@ -30,10 +36,12 @@ const Index = () => {
   return (
     <WebSocketProvider>
       <div className="min-h-screen bg-trading-dark text-foreground">
-        <header className="bg-trading-card border-b border-trading-highlight p-4">
+        <header className={`${themeStyle === 'colorful' ? 'bg-gradient-to-r from-trading-card to-indigo-900' : 'bg-trading-card'} border-b border-trading-highlight p-4`}>
           <div className="container">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <h1 className="text-2xl font-bold text-primary">Bybit Signal Sniper</h1>
+              <h1 className={`text-2xl font-bold ${themeStyle === 'colorful' ? 'text-gradient-primary' : 'text-primary'}`}>
+                Bybit Signal Sniper
+              </h1>
               <div className="flex items-center gap-4">
                 <WebSocketStatus />
                 <UserMenu />
@@ -58,7 +66,7 @@ const Index = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center mb-4">
                   <h2 className="text-xl font-medium">Графики</h2>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <div className="flex items-center bg-trading-highlight rounded-md p-1">
                       <button 
                         onClick={() => setThemeStyle('dark')} 
@@ -94,22 +102,7 @@ const Index = () => {
                 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   <TradingViewChart symbol={selectedPair} theme={themeStyle} height={400} />
-                  <Tabs defaultValue="coinglass" className="w-full">
-                    <TabsList className="bg-trading-highlight w-full">
-                      <TabsTrigger value="coinglass">Coinglass</TabsTrigger>
-                      <TabsTrigger value="liquidations">Ликвидации</TabsTrigger>
-                      <TabsTrigger value="openinterest">Открытый интерес</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="coinglass">
-                      <CoinglassWidget type="funding" title="Ставка финансирования" height={350} />
-                    </TabsContent>
-                    <TabsContent value="liquidations">
-                      <CoinglassWidget type="liquidations" title="Ликвидации" height={350} />
-                    </TabsContent>
-                    <TabsContent value="openinterest">
-                      <CoinglassWidget type="openInterest" title="Открытый интерес" height={350} />
-                    </TabsContent>
-                  </Tabs>
+                  <CoinglassWidget type="all" title="Аналитика Coinglass" height={400} />
                 </div>
               </div>
             </>
@@ -132,12 +125,12 @@ const Index = () => {
                     <div className="flex-1">
                       <h3 className="font-medium mb-2 text-white">Преимущества Premium:</h3>
                       <ul className="space-y-1 text-sm text-gray-300">
-                        <li>• Высокоточные сигналы с 10+ индикаторами</li>
-                        <li>• Интеграция с TradingView и Coinglass</li>
-                        <li>• Расширенная аналитика</li>
+                        <li>• Высокоточные сигналы с 20+ индикаторами</li>
+                        <li>• Интеграция с TradingView и полный доступ к Coinglass</li>
+                        <li>• Расширенная аналитика и разные цветовые темы</li>
                         <li>• Подключение аккаунта Bybit</li>
-                        <li>• Все монеты и все таймфреймы</li>
-                        <li>• Email-уведомления</li>
+                        <li>• Все криптовалюты (≈500 монет)</li>
+                        <li>• Email-уведомления о точных сигналах</li>
                       </ul>
                     </div>
                     <div className="flex items-center justify-center">
@@ -161,17 +154,20 @@ const Index = () => {
               <h2 className="text-xl font-medium mb-4">Аналитика</h2>
               <div className="space-y-6">
                 <OpenInterestTable />
+                {isPremium && (
+                  <CoinglassWidget type="longShortRatio" title="Long/Short соотношение" height={300} />
+                )}
               </div>
             </div>
           </div>
         </div>
         
-        <footer className="mt-8 border-t border-trading-highlight bg-trading-card py-4">
+        <footer className={`mt-8 border-t border-trading-highlight ${themeStyle === 'colorful' ? 'bg-gradient-to-r from-trading-card to-indigo-900' : 'bg-trading-card'} py-4`}>
           <div className="container text-center text-sm text-muted-foreground">
             <p>Bybit Signal Sniper © {new Date().getFullYear()}</p>
-            <p className="text-xs mt-1">Анализ в реальном времени для профессиональных трейдеров</p>
+            <p className="text-xs mt-1">Высокоточные сигналы для профессиональных трейдеров</p>
           </div>
-        </footer>
+        </div>
       </div>
     </WebSocketProvider>
   );
