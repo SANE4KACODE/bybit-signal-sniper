@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Signal } from "@/types";
-import { formatPrice, getSignalColorClass, getStrengthIndicator, getStrengthDescription } from "@/utils/signalUtils";
+import { formatPrice, getSignalColorClass, getStrengthIndicator, getStrengthDescription } from "@/utils/signals";
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { Star, Share, ChevronDown, ChevronUp } from "lucide-react";
