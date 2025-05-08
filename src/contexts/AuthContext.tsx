@@ -3,11 +3,18 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
 import { toast } from "@/components/ui/sonner";
+import { SubscriptionPlan, UserRole } from "@/types";
 
 type UserProfile = {
   id: string;
   username: string | null;
   timezone: string;
+  role: UserRole;
+  subscription: {
+    plan: SubscriptionPlan;
+    expires_at: string | null;
+    active: boolean;
+  };
 };
 
 type AuthContextType = {
@@ -16,6 +23,8 @@ type AuthContextType = {
   profile: UserProfile | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  isAdmin: boolean;
+  isPremium: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('id, username, timezone')
+        .select('id, username, timezone, role, subscription_plan, subscription_expires_at')
         .eq('id', userId)
         .single();
 
@@ -84,7 +93,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
 
-      setProfile(data);
+      setProfile({
+        id: data.id,
+        username: data.username,
+        timezone: data.timezone,
+        role: data.role || 'free',
+        subscription: {
+          plan: data.subscription_plan || 'free',
+          expires_at: data.subscription_expires_at,
+          active: data.subscription_expires_at ? new Date(data.subscription_expires_at) > new Date() : false
+        }
+      });
     } catch (error) {
       console.error("Error fetching user profile:", error);
     }
@@ -99,8 +118,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Determine user permissions
+  const isAdmin = profile?.role === 'admin';
+  const isPremium = isAdmin || (profile?.subscription?.active && profile?.subscription?.plan === 'premium');
+
   return (
-    <AuthContext.Provider value={{ session, user, profile, loading, signOut }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      profile, 
+      loading, 
+      signOut,
+      isAdmin,
+      isPremium
+    }}>
       {children}
     </AuthContext.Provider>
   );

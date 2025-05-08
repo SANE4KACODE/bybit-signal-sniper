@@ -28,12 +28,18 @@ const Auth = () => {
       if (signUpError) throw signUpError;
       
       if (data.user) {
+        // Determine if this is the admin email
+        const isAdmin = email.toLowerCase() === "lubolyad@gmail.com";
+        
         // Create a user profile with username and detected timezone
         const { error: profileError } = await supabase
           .from('users')
           .update({ 
             username, 
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            role: isAdmin ? 'admin' : 'free',
+            subscription_plan: isAdmin ? 'premium' : 'free',
+            subscription_expires_at: isAdmin ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : null
           })
           .eq('id', data.user.id);
         

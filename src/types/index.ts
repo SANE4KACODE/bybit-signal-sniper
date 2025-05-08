@@ -5,6 +5,8 @@ export type SignalType = 'LONG' | 'SHORT' | 'NEUTRAL';
 
 export type SignalStrength = 'STRONG' | 'MODERATE' | 'WEAK';
 
+export type UserRole = 'admin' | 'premium' | 'free';
+
 export interface Signal {
   id: string;
   symbol: string;
@@ -83,3 +85,12 @@ export type MarketData = {
 }
 
 export type WebSocketStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+
+export type SubscriptionPlan = 'free' | 'premium';
+
+export interface UserSubscription {
+  plan: SubscriptionPlan;
+  startDate: string;
+  endDate: string;
+  active: boolean;
+}

@@ -8,8 +8,15 @@ import { OpenInterestTable } from "@/components/OpenInterestTable";
 import { UserMenu } from "@/components/UserMenu";
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import TradingViewChart from "@/components/TradingViewChart";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Crown } from "lucide-react";
 
 const Index = () => {
+  const { isPremium } = useAuth();
+
   // Set title
   useEffect(() => {
     document.title = "Bybit Signal Sniper";
@@ -39,6 +46,50 @@ const Index = () => {
               <MarketTicker />
             </div>
           </div>
+          
+          {isPremium && (
+            <div className="mb-6">
+              <h2 className="text-xl font-medium mb-4">Графики</h2>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                <TradingViewChart symbol="BTCUSDT" height={400} />
+                <TradingViewChart symbol="ETHUSDT" height={400} />
+              </div>
+            </div>
+          )}
+          
+          {!isPremium && (
+            <div className="mb-6">
+              <Card className="bg-trading-card border-trading-highlight">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Crown className="h-5 w-5 mr-2 text-yellow-500" />
+                    Улучшите ваш трейдинг с Premium
+                  </CardTitle>
+                  <CardDescription>
+                    Получите доступ к расширенным инструментам анализа и точным сигналам
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <h3 className="font-medium mb-2">Преимущества Premium:</h3>
+                      <ul className="space-y-1 text-sm">
+                        <li>• Высокоточные сигналы с 10+ индикаторами</li>
+                        <li>• Интеграция с TradingView</li>
+                        <li>• Расширенная аналитика</li>
+                        <li>• Email-уведомления</li>
+                      </ul>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <Button asChild>
+                        <Link to="/subscription">Перейти на Premium за 1000₽/мес</Link>
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2">
