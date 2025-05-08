@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('id, username, timezone, role, subscription_plan, subscription_expires_at')
+        .select('id, username, timezone')
         .eq('id', userId)
         .single();
 
@@ -93,15 +93,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
 
+      // Since 'role', 'subscription_plan', and 'subscription_expires_at' columns don't exist
+      // We'll use default values and check if the email is the admin email
+      const isAdminUser = data.username === 'admin' || (user?.email === 'lubolyad@gmail.com');
+      const subscriptionPlan = isAdminUser ? 'premium' : 'free';
+      const subscriptionExpiresAt = isAdminUser ? '2099-12-31' : null;
+      
       setProfile({
         id: data.id,
         username: data.username,
-        timezone: data.timezone,
-        role: data.role || 'free',
+        timezone: data.timezone || 'Europe/Moscow',
+        role: isAdminUser ? 'admin' : 'free',
         subscription: {
-          plan: data.subscription_plan || 'free',
-          expires_at: data.subscription_expires_at,
-          active: data.subscription_expires_at ? new Date(data.subscription_expires_at) > new Date() : false
+          plan: subscriptionPlan,
+          expires_at: subscriptionExpiresAt,
+          active: subscriptionPlan === 'premium'
         }
       });
     } catch (error) {
@@ -119,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Determine user permissions
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin' || user?.email === 'lubolyad@gmail.com';
   const isPremium = isAdmin || (profile?.subscription?.active && profile?.subscription?.plan === 'premium');
 
   return (

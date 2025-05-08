@@ -59,7 +59,7 @@ const SignalCard = ({ signal }: SignalCardProps) => {
 
   return (
     <>
-      <Card className="bg-trading-card border-trading-highlight">
+      <Card className="bg-trading-card border-trading-highlight hover:border-primary/50 transition-colors">
         <CardContent className="p-4">
           <div className="flex justify-between items-start mb-3">
             <div>
@@ -151,4 +151,3 @@ const SignalCard = ({ signal }: SignalCardProps) => {
 };
 
 export default SignalCard;
-

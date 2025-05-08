@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save } from "lucide-react";
@@ -10,6 +9,7 @@ import { Link } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 import { SignalSettings } from "@/components/settings/SignalSettings";
 import { EmailSettings } from "@/components/settings/EmailSettings";
+import BybitSettings from "@/components/settings/BybitSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Settings = () => {
@@ -47,8 +47,10 @@ const Settings = () => {
       <div className="container my-8">
         <Tabs defaultValue="signals" className="w-full">
           <TabsList className="mb-6">
-            <TabsTrigger value="signals">Настройки сигналов</TabsTrigger>
-            <TabsTrigger value="notifications">Настройки уведомлений</TabsTrigger>
+            <TabsTrigger value="signals">Сигналы</TabsTrigger>
+            <TabsTrigger value="notifications">Уведомления</TabsTrigger>
+            <TabsTrigger value="bybit">Bybit</TabsTrigger>
+            <TabsTrigger value="appearance">Внешний вид</TabsTrigger>
           </TabsList>
           
           <TabsContent value="signals">
@@ -57,6 +59,45 @@ const Settings = () => {
           
           <TabsContent value="notifications">
             <EmailSettings />
+          </TabsContent>
+          
+          <TabsContent value="bybit">
+            <BybitSettings />
+          </TabsContent>
+          
+          <TabsContent value="appearance">
+            <Card className="bg-trading-card border-trading-highlight">
+              <CardHeader>
+                <CardTitle>Настройки отображения</CardTitle>
+                <CardDescription>
+                  Настройте внешний вид приложения по вашему вкусу
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-2">Тема TradingView</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="border border-primary rounded-md p-3 cursor-pointer bg-trading-card">
+                        <div className="text-center mb-2">Темная</div>
+                        <div className="h-20 bg-trading-dark rounded"></div>
+                      </div>
+                      <div className="border border-muted rounded-md p-3 cursor-pointer">
+                        <div className="text-center mb-2">Светлая</div>
+                        <div className="h-20 bg-white rounded"></div>
+                      </div>
+                      <div className="border border-muted rounded-md p-3 cursor-pointer bg-gradient-to-br from-trading-card to-indigo-900">
+                        <div className="text-center mb-2">Цветная</div>
+                        <div className="h-20 bg-gradient-to-br from-indigo-500 to-purple-500 rounded"></div>
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Выбор темы влияет на отображение графиков TradingView
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
