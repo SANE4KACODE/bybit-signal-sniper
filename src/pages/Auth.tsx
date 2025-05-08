@@ -68,7 +68,7 @@ const Auth = () => {
         await supabase
           .from('users')
           .update({ 
-            last_login: new Date(),
+            last_login: new Date().toISOString(),
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone 
           })
           .eq('id', data.user.id);

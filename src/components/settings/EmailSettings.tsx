@@ -4,13 +4,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { Save, Mail, Clock } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TimeField } from "@/components/TimeField";
+import { Separator } from "@/components/ui/separator";
 
 export function EmailSettings() {
   const { user } = useAuth();
@@ -36,7 +37,7 @@ export function EmailSettings() {
         .from('email_notification_settings')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         if (error.code !== 'PGRST116') { // No rows returned
@@ -118,7 +119,7 @@ export function EmailSettings() {
   
   if (loading) {
     return (
-      <Card>
+      <Card className="bg-trading-card border-trading-highlight">
         <CardContent className="pt-6">
           <p className="text-center text-muted-foreground">Загрузка настроек...</p>
         </CardContent>
@@ -128,69 +129,85 @@ export function EmailSettings() {
   
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-trading-card border-trading-highlight">
         <CardHeader>
-          <CardTitle>Настройки уведомлений по электронной почте</CardTitle>
+          <CardTitle className="text-primary flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Настройки уведомлений по электронной почте
+          </CardTitle>
           <CardDescription>
-            Настройте получение уведомлений о новых сигналах
+            Настройте получение уведомлений о новых торговых сигналах на вашу почту
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email для уведомлений</Label>
+                <Label htmlFor="email" className="text-sm font-medium">Email для уведомлений</Label>
                 <Input 
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
+                  className="bg-background/50"
                 />
               </div>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 p-3 rounded-md bg-muted/10 mt-4">
               <Switch 
                 id="notifications-enabled"
                 checked={isEnabled}
                 onCheckedChange={setIsEnabled}
               />
-              <Label htmlFor="notifications-enabled">Включить уведомления по email</Label>
+              <Label htmlFor="notifications-enabled" className="font-medium">Включить уведомления по email</Label>
             </div>
             
             {isEnabled && (
               <>
-                <div className="flex items-center space-x-2 ml-6">
-                  <Checkbox 
-                    id="strong-only"
-                    checked={notifyOnStrongOnly}
-                    onCheckedChange={() => setNotifyOnStrongOnly(!notifyOnStrongOnly)}
-                  />
-                  <Label htmlFor="strong-only">Уведомлять только о сильных сигналах</Label>
-                </div>
-                
-                <div className="pt-4 border-t border-border">
-                  <div className="flex items-center space-x-2">
-                    <Switch 
-                      id="daily-digest"
-                      checked={dailyDigestEnabled}
-                      onCheckedChange={setDailyDigestEnabled}
+                <div className="pl-6 space-y-4">
+                  <div className="flex items-center space-x-2 p-2 rounded-md">
+                    <Checkbox 
+                      id="strong-only"
+                      checked={notifyOnStrongOnly}
+                      onCheckedChange={() => setNotifyOnStrongOnly(!notifyOnStrongOnly)}
                     />
-                    <Label htmlFor="daily-digest">Ежедневная сводка</Label>
+                    <Label htmlFor="strong-only">Уведомлять только о сильных сигналах (10+ индикаторов)</Label>
                   </div>
                   
-                  {dailyDigestEnabled && (
-                    <div className="mt-4 ml-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="digest-time">Время отправки сводки (МСК)</Label>
-                        <TimeField 
-                          value={dailyDigestTime}
-                          onChange={(value) => setDailyDigestTime(value)}
-                        />
-                      </div>
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <h3 className="font-medium">Ежедневная сводка</h3>
                     </div>
-                  )}
+                    
+                    <div className="flex items-center space-x-2 p-2 rounded-md">
+                      <Switch 
+                        id="daily-digest"
+                        checked={dailyDigestEnabled}
+                        onCheckedChange={setDailyDigestEnabled}
+                      />
+                      <Label htmlFor="daily-digest">Отправлять ежедневную сводку сигналов</Label>
+                    </div>
+                    
+                    {dailyDigestEnabled && (
+                      <div className="ml-6 mt-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="digest-time" className="text-sm">Время отправки сводки (МСК)</Label>
+                          <TimeField 
+                            value={dailyDigestTime}
+                            onChange={(value) => setDailyDigestTime(value)}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Вы будете получать сводку всех активных сигналов в указанное время
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </>
             )}
@@ -199,7 +216,7 @@ export function EmailSettings() {
       </Card>
       
       <div className="flex justify-end">
-        <Button onClick={saveSettings} disabled={saving}>
+        <Button onClick={saveSettings} disabled={saving} className="bg-primary hover:bg-primary/90">
           {saving ? (
             "Сохранение..."
           ) : (

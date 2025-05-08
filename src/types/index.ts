@@ -32,6 +32,44 @@ export interface Signal {
       ema100: number;
       sma200: number;
     };
+    stochastic?: {
+      k: number;
+      d: number;
+    };
+    atr?: {
+      value: number;
+      average: number;
+    };
+    adx?: {
+      value: number;
+      plusDI: number;
+      minusDI: number;
+    };
+    obv?: {
+      current: number;
+      previous: number;
+    };
+    ichimoku?: {
+      tenkanSen: number;
+      kijunSen: number;
+      senkouSpanA: number;
+      senkouSpanB: number;
+      cloud: {
+        top: number;
+        bottom: number;
+      }
+    };
+    wma?: {
+      wma9: number;
+      wma21: number;
+    };
+    psar?: {
+      value: number;
+      isReversal: boolean;
+    };
+    mfi?: number;
+    cci?: number;
+    williamsr?: number;
   };
 }
 

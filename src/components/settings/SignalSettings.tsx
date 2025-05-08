@@ -10,7 +10,8 @@ import { TimeFrame, SignalStrength, SignalType } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function SignalSettings() {
   const { user } = useAuth();
@@ -25,7 +26,12 @@ export function SignalSettings() {
   
   // Available options
   const timeframes: TimeFrame[] = ['1m', '3m', '5m', '15m', '30m', '1h', '4h', '1d'];
-  const symbols = ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'LTCUSDT'];
+  const symbols = [
+    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'ADAUSDT', 'DOGEUSDT', 'LTCUSDT',
+    'AVAXUSDT', 'DOTUSDT', 'MATICUSDT', 'LINKUSDT', 'UNIUSDT', 'SHIBUSDT', 'TRXUSDT', 'ETCUSDT',
+    'ATOMUSDT', 'ICPUSDT', 'XLMUSDT', 'VETUSDT', 'FILUSDT', 'APTUSDT', 'NEARUSDT', 'ALGOUSDT',
+    'EOSUSDT', 'AAVEUSDT', 'AXSUSDT', 'FTMUSDT', 'SANDUSDT', 'MANAUSDT', 'CAKEUSDT', 'QNTUSDT'
+  ];
   const strengths: SignalStrength[] = ['WEAK', 'MODERATE', 'STRONG'];
   const signalTypes: SignalType[] = ['LONG', 'SHORT', 'NEUTRAL'];
   
@@ -41,7 +47,7 @@ export function SignalSettings() {
         .from('user_signal_settings')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         if (error.code !== 'PGRST116') { // No rows returned
@@ -50,10 +56,10 @@ export function SignalSettings() {
       }
       
       if (data) {
-        setSelectedTimeframes(data.timeframes || []);
+        setSelectedTimeframes(data.timeframes as TimeFrame[]);
         setSelectedSymbols(data.symbols || []);
-        setSelectedStrength(data.min_strength || 'WEAK');
-        setSelectedSignalTypes(data.signal_types || []);
+        setSelectedStrength(data.min_strength as SignalStrength);
+        setSelectedSignalTypes(data.signal_types as SignalType[]);
       } else {
         // Default settings
         setSelectedTimeframes(['5m', '15m', '1h', '4h', '1d']);
@@ -143,6 +149,14 @@ export function SignalSettings() {
       setSelectedSignalTypes([...selectedSignalTypes, type]);
     }
   };
+
+  const selectAllSymbols = () => {
+    setSelectedSymbols([...symbols]);
+  };
+
+  const clearAllSymbols = () => {
+    setSelectedSymbols([]);
+  };
   
   if (loading) {
     return (
@@ -156,16 +170,16 @@ export function SignalSettings() {
   
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-trading-card border-trading-highlight">
         <CardHeader>
-          <CardTitle>Настройки сигналов</CardTitle>
+          <CardTitle className="text-primary">Настройки сигналов</CardTitle>
           <CardDescription>
             Настройте параметры отображаемых сигналов
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium mb-3">Таймфреймы</h3>
+            <h3 className="text-lg font-medium mb-3 text-primary">Таймфреймы</h3>
             <div className="flex flex-wrap gap-2">
               {timeframes.map(timeframe => (
                 <Button
@@ -173,6 +187,7 @@ export function SignalSettings() {
                   variant={selectedTimeframes.includes(timeframe) ? "default" : "outline"}
                   size="sm"
                   onClick={() => toggleTimeframe(timeframe)}
+                  className={selectedTimeframes.includes(timeframe) ? "bg-primary" : ""}
                 >
                   {timeframe}
                 </Button>
@@ -181,38 +196,77 @@ export function SignalSettings() {
           </div>
           
           <div>
-            <h3 className="text-lg font-medium mb-3">Символы</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {symbols.map(symbol => (
-                <div key={symbol} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={`symbol-${symbol}`}
-                    checked={selectedSymbols.includes(symbol)}
-                    onCheckedChange={() => toggleSymbol(symbol)}
-                  />
-                  <Label htmlFor={`symbol-${symbol}`}>{symbol}</Label>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium text-primary">Торговые пары</h3>
+              <div className="space-x-2">
+                <Button variant="outline" size="sm" onClick={selectAllSymbols}>
+                  Выбрать все
+                </Button>
+                <Button variant="outline" size="sm" onClick={clearAllSymbols}>
+                  Очистить
+                </Button>
+              </div>
+            </div>
+            
+            <Tabs defaultValue="grid">
+              <TabsList className="mb-4">
+                <TabsTrigger value="grid">Сетка</TabsTrigger>
+                <TabsTrigger value="list">Список</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="grid">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {symbols.map(symbol => (
+                    <div key={symbol} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`symbol-grid-${symbol}`}
+                        checked={selectedSymbols.includes(symbol)}
+                        onCheckedChange={() => toggleSymbol(symbol)}
+                      />
+                      <Label htmlFor={`symbol-grid-${symbol}`}>{symbol}</Label>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </TabsContent>
+              
+              <TabsContent value="list">
+                <ScrollArea className="h-[250px] pr-4">
+                  <div className="space-y-2">
+                    {symbols.map(symbol => (
+                      <div key={symbol} className="flex items-center space-x-2 p-2 hover:bg-muted/20 rounded-md">
+                        <Checkbox 
+                          id={`symbol-list-${symbol}`}
+                          checked={selectedSymbols.includes(symbol)}
+                          onCheckedChange={() => toggleSymbol(symbol)}
+                        />
+                        <Label htmlFor={`symbol-list-${symbol}`}>{symbol}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </div>
+          
+          <div>
+            <h3 className="text-lg font-medium mb-3 text-primary">Минимальная сила сигнала</h3>
+            <div className="bg-muted/10 p-4 rounded-md">
+              <RadioGroup value={selectedStrength} onValueChange={(value) => setSelectedStrength(value as SignalStrength)}>
+                {strengths.map(strength => (
+                  <div key={strength} className="flex items-center space-x-2">
+                    <RadioGroupItem value={strength} id={`strength-${strength}`} />
+                    <Label htmlFor={`strength-${strength}`}>
+                      {strength === 'WEAK' ? 'Слабый - минимум 3 индикатора' : 
+                       strength === 'MODERATE' ? 'Средний - минимум 6 индикаторов' : 'Сильный - минимум 10 индикаторов'}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
             </div>
           </div>
           
           <div>
-            <h3 className="text-lg font-medium mb-3">Минимальная сила сигнала</h3>
-            <RadioGroup value={selectedStrength} onValueChange={(value) => setSelectedStrength(value as SignalStrength)}>
-              {strengths.map(strength => (
-                <div key={strength} className="flex items-center space-x-2">
-                  <RadioGroupItem value={strength} id={`strength-${strength}`} />
-                  <Label htmlFor={`strength-${strength}`}>
-                    {strength === 'WEAK' ? 'Слабый' : 
-                     strength === 'MODERATE' ? 'Средний' : 'Сильный'}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-medium mb-3">Типы сигналов</h3>
+            <h3 className="text-lg font-medium mb-3 text-primary">Типы сигналов</h3>
             <div className="flex flex-wrap gap-2">
               {signalTypes.map(type => (
                 <Button
@@ -220,7 +274,17 @@ export function SignalSettings() {
                   variant={selectedSignalTypes.includes(type) ? "default" : "outline"}
                   size="sm"
                   onClick={() => toggleSignalType(type)}
-                  className={type === 'LONG' ? "text-success" : type === 'SHORT' ? "text-warning" : ""}
+                  className={`
+                    ${selectedSignalTypes.includes(type) ? (
+                      type === 'LONG' ? "bg-success text-background" : 
+                      type === 'SHORT' ? "bg-warning text-background" : 
+                      "bg-primary"
+                    ) : (
+                      type === 'LONG' ? "text-success border-success" : 
+                      type === 'SHORT' ? "text-warning border-warning" : 
+                      ""
+                    )}
+                  `}
                 >
                   {type === 'LONG' ? 'ЛОНГ' : 
                    type === 'SHORT' ? 'ШОРТ' : 'НЕЙТРАЛЬНЫЙ'}
@@ -232,7 +296,7 @@ export function SignalSettings() {
       </Card>
       
       <div className="flex justify-end">
-        <Button onClick={saveSettings} disabled={saving}>
+        <Button onClick={saveSettings} disabled={saving} className="bg-primary hover:bg-primary/90">
           {saving ? (
             "Сохранение..."
           ) : (
