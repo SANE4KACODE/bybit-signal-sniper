@@ -167,7 +167,7 @@ const Index = () => {
             <p>Bybit Signal Sniper © {new Date().getFullYear()}</p>
             <p className="text-xs mt-1">Высокоточные сигналы для профессиональных трейдеров</p>
           </div>
-        </div>
+        </footer>
       </div>
     </WebSocketProvider>
   );
