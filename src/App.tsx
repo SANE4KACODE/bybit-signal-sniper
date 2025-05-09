@@ -12,27 +12,30 @@ import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
 import Terms from "./pages/Terms";
 import { AuthProvider } from "./contexts/AuthContext";
+import { WebSocketProvider } from "./contexts/WebSocketContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/saved-signals" element={<SavedSignals />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/subscription" element={<Subscription />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <WebSocketProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/saved-signals" element={<SavedSignals />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/subscription" element={<Subscription />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </WebSocketProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

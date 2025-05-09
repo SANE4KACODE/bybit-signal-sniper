@@ -1,4 +1,5 @@
-import { Signal } from "@/types";
+
+import { MarketData, Signal, SignalStrength, SignalType, TimeFrame, WebSocketStatus } from "@/types";
 
 // Функция для генерации случайного числа в заданном диапазоне
 const randomNumber = (min, max) => {
@@ -11,14 +12,14 @@ const randomPrice = (min, max) => {
 };
 
 // Функция для генерации случайного типа сигнала
-const generateSignalType = () => {
-  const types = ['LONG', 'SHORT'];
+const generateSignalType = (): SignalType => {
+  const types: SignalType[] = ['LONG', 'SHORT'];
   return types[Math.floor(Math.random() * types.length)];
 };
 
 // Функция для генерации случайного таймфрейма
-const generateTimeFrame = () => {
-  const timeFrames = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
+const generateTimeFrame = (): TimeFrame => {
+  const timeFrames: TimeFrame[] = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
   return timeFrames[Math.floor(Math.random() * timeFrames.length)];
 };
 
@@ -29,7 +30,7 @@ const generateAsset = () => {
 };
 
 // Функция для генерации базовых индикаторов
-const generateBaseIndicators = (signalType, price) => {
+const generateBaseIndicators = (signalType: SignalType, price: number) => {
   return {
     rsi: randomNumber(30, 70),
     macd: {
@@ -77,11 +78,13 @@ const generateBaseIndicators = (signalType, price) => {
     wpr: randomNumber(-100, 0),
     supertrend: {
       value: price * randomNumber(0.9, 1.1),
-      direction: Math.random() > 0.5 ? 'up' : 'down',
+      direction: Math.random() > 0.5 ? 'up' as const : 'down' as const,
     },
     dmi: {
       plus: randomNumber(20, 60),
       minus: randomNumber(20, 60),
+      plusDI: randomNumber(20, 60),
+      minusDI: randomNumber(20, 60),
     },
     aroon: {
       up: randomNumber(0, 100),
@@ -101,8 +104,8 @@ const generateBaseIndicators = (signalType, price) => {
   };
 };
 
-// Исправим генерацию индикаторов, чтобы включить недостающие поля
-const generateIndicators = (signalType, price) => {
+// Функция для генерации индикаторов с исправленными типами
+const generateIndicators = (signalType: SignalType, price: number) => {
   const baseIndicators = generateBaseIndicators(signalType, price);
 
   return {
@@ -111,7 +114,7 @@ const generateIndicators = (signalType, price) => {
     // Добавим недостающий isReversal для psar
     psar: {
       value: signalType === 'LONG' ? price * 0.98 : price * 1.02,
-      isReversal: Math.random() > 0.8 // Добавляем требуемое поле isReversal
+      isReversal: Math.random() > 0.8
     },
     
     // Добавляем новые индикаторы из Билла Вильямса и др.
@@ -129,8 +132,121 @@ const generateIndicators = (signalType, price) => {
   };
 };
 
-// Функция для создания мок-сигнала
-export const createMockSignal = (): Signal => {
+// Создаем функцию для создания случайного сигнала
+const createRandomSignal = (): Signal => {
+  const signalType = generateSignalType();
+  const price = randomPrice(50000, 65000);
+  
+  return {
+    id: Math.random().toString(36).substring(2, 15),
+    symbol: generateAsset(),
+    timeframe: generateTimeFrame(),
+    signalType: signalType,
+    price: price,
+    strength: Math.random() > 0.7 ? 'STRONG' : Math.random() > 0.5 ? 'MODERATE' : 'WEAK',
+    timestamp: Date.now(),
+    openInterestChange: randomNumber(-5, 5),
+    
+    // Добавляем все обязательные поля для типа Signal
+    entryPrice: price,
+    takeProfit: signalType === 'LONG' ? price * 1.05 : price * 0.95,
+    stopLoss: signalType === 'LONG' ? price * 0.97 : price * 1.03,
+    leverage: Math.ceil(randomNumber(1, 10)),
+    status: 'ACTIVE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'mock-user-id',
+    indicators: generateIndicators(signalType, price)
+  };
+};
+
+// Создаем функцию для создания случайных данных рынка
+const createRandomMarketData = (): MarketData[] => {
+  const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'XRPUSDT'];
+  
+  return symbols.map(symbol => {
+    const lastPrice = symbol === 'BTCUSDT' 
+      ? randomPrice(50000, 65000) 
+      : symbol === 'ETHUSDT'
+        ? randomPrice(3000, 4000)
+        : randomPrice(100, 1000);
+        
+    return {
+      symbol,
+      lastPrice,
+      priceChangePercent: randomNumber(-5, 5),
+      volume: randomNumber(1000000, 10000000),
+      openInterest: randomNumber(500000, 5000000),
+      openInterestChange: randomNumber(-5, 5)
+    };
+  });
+};
+
+// Экспортируем функцию создания мок-сервиса веб-сокета
+export function createMockWebSocketService(callbacks: {
+  onMarketData: (data: MarketData[]) => void,
+  onSignal: (signal: Signal) => void,
+  onStatusChange: (status: WebSocketStatus) => void
+}) {
+  let interval: ReturnType<typeof setInterval> | null = null;
+  let signalInterval: ReturnType<typeof setInterval> | null = null;
+  let marketDataInterval: ReturnType<typeof setInterval> | null = null;
+  let isConnected = false;
+  
+  return {
+    connect: () => {
+      if (isConnected) return;
+      
+      callbacks.onStatusChange('connecting');
+      
+      // Имитируем задержку соединения
+      setTimeout(() => {
+        isConnected = true;
+        callbacks.onStatusChange('connected');
+        
+        // Отправляем начальные данные рынка
+        callbacks.onMarketData(createRandomMarketData());
+        
+        // Запускаем обновления данных рынка каждые 5 секунд
+        marketDataInterval = setInterval(() => {
+          callbacks.onMarketData(createRandomMarketData());
+        }, 5000);
+        
+        // Отправляем сигналы случайно каждые 10-30 секунд
+        signalInterval = setInterval(() => {
+          if (Math.random() > 0.3) { // 70% шанс отправки сигнала
+            callbacks.onSignal(createRandomSignal());
+          }
+        }, Math.floor(randomNumber(10000, 30000)));
+        
+      }, 1500);
+    },
+    
+    disconnect: () => {
+      if (!isConnected) return;
+      
+      isConnected = false;
+      
+      if (interval) clearInterval(interval);
+      if (signalInterval) clearInterval(signalInterval);
+      if (marketDataInterval) clearInterval(marketDataInterval);
+      
+      interval = null;
+      signalInterval = null;
+      marketDataInterval = null;
+      
+      callbacks.onStatusChange('disconnected');
+    },
+    
+    isConnected: () => isConnected
+  };
+}
+
+// Сохраняем существующие экспорты
+export { createMockSignal, createMockSignals };
+
+// Функция для создания мок-сигнала с исправленными типами
+export const createMockSignal = (): any => {
   const signalType = generateSignalType();
   const asset = generateAsset();
   const timeFrame = generateTimeFrame();
@@ -139,19 +255,19 @@ export const createMockSignal = (): Signal => {
 
   return {
     id: Math.random().toString(36).substring(7),
-    asset: asset,
-    timeFrame: timeFrame,
+    symbol: asset,
+    timeframe: timeFrame,
     signalType: signalType,
     price: price,
     indicators: indicators,
-    date: new Date(),
-    isNew: Math.random() > 0.5,
+    timestamp: Date.now(),
+    strength: Math.random() > 0.7 ? 'STRONG' as SignalStrength : Math.random() > 0.5 ? 'MODERATE' as SignalStrength : 'WEAK' as SignalStrength
   };
 };
 
 // Функция для создания массива мок-сигналов
-export const createMockSignals = (count: number): Signal[] => {
-  const signals: Signal[] = [];
+export const createMockSignals = (count: number): any[] => {
+  const signals: any[] = [];
   for (let i = 0; i < count; i++) {
     signals.push(createMockSignal());
   }

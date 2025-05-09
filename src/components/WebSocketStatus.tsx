@@ -14,13 +14,13 @@ export const WebSocketStatus = () => {
             className={`w-3 h-3 rounded-full mr-2 ${
               status === 'connected' ? 'bg-success animate-pulse-slow' : 
               status === 'connecting' ? 'bg-amber-400 animate-pulse-slow' : 
-              status === 'error' ? 'bg-warning' : 'bg-muted'
+              'bg-muted'
             }`}
           />
           <span className="text-sm">
             {status === 'connected' ? 'Подключено' : 
              status === 'connecting' ? 'Подключение...' : 
-             status === 'error' ? 'Ошибка' : 'Отключено'}
+             'Отключено'}
           </span>
         </div>
       </div>

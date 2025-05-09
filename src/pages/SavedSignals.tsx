@@ -34,12 +34,21 @@ const SavedSignals = () => {
           id: item.signal_id,
           symbol: item.symbol,
           timestamp: item.timestamp,
-          signalType: item.signal_type as any,
-          strength: item.strength as any,
+          signalType: item.signal_type,
+          strength: item.strength,
           price: Number(item.price),
-          openInterestChange: 0, // We don't store this in saved signals
-          timeframe: item.timeframe as any,
-          indicators: {} // We don't store indicators in saved signals
+          openInterestChange: 0, // Default value
+          timeframe: item.timeframe,
+          // Add required fields for Signal type
+          entryPrice: Number(item.price),
+          takeProfit: Number(item.price) * (item.signal_type === 'LONG' ? 1.05 : 0.95),
+          stopLoss: Number(item.price) * (item.signal_type === 'LONG' ? 0.95 : 1.05),
+          leverage: 1, // Default value
+          status: 'ACTIVE',
+          createdAt: item.created_at || new Date().toISOString(),
+          updatedAt: item.created_at || new Date().toISOString(),
+          userId: user.id,
+          indicators: {} // Empty indicators object
         }));
         
         setSignals(formattedSignals);

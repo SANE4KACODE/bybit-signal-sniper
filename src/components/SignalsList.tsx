@@ -7,9 +7,11 @@ import { SignalType } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
+type SignalFilterType = SignalType | 'ALL';
+
 export const SignalsList = () => {
   const { signals, clearSignals } = useWebSocket();
-  const [filter, setFilter] = useState<SignalType | 'ALL'>('ALL');
+  const [filter, setFilter] = useState<SignalFilterType>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Filter signals based on type and search query
@@ -54,13 +56,6 @@ export const SignalsList = () => {
             className="text-warning"
           >
             ШОРТ
-          </Button>
-          <Button
-            variant={filter === 'NEUTRAL' ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter('NEUTRAL')}
-          >
-            НЕЙТРАЛЬНО
           </Button>
         </div>
         

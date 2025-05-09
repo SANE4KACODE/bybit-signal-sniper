@@ -48,8 +48,8 @@ export const WebSocketProvider = ({ children }: { children: ReactNode }) => {
           toast.success("Подключено к Bybit WebSocket");
         } else if (newStatus === 'disconnected') {
           toast.info("Отключено от Bybit WebSocket");
-        } else if (newStatus === 'error') {
-          toast.error("Ошибка подключения к Bybit WebSocket");
+        } else if (newStatus === 'connecting') {
+          toast.warning("Подключение к Bybit WebSocket...");
         }
       }
     });
