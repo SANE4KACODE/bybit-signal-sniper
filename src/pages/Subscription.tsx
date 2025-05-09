@@ -9,7 +9,7 @@ import { CheckCircle, ArrowLeft, CreditCard, Wallet, Shield } from "lucide-react
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-// Компонент формы оплаты через Юмани
+// Компонент формы оплаты через Юмани с улучшенной документацией
 const YooMoneyPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => void }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
@@ -21,13 +21,37 @@ const YooMoneyPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () =>
     
     try {
       // В реальном приложении здесь был бы код запроса к серверному API для создания платежа
-      // Для демонстрации мы имитируем успешную инициализацию платежа
+      // В качестве иллюстрации, вот как может выглядеть процесс интеграции с ЮMoney:
       
-      // Имитация запроса к API
+      // 1. Формируем данные для платежа
+      const paymentData = {
+        amount: {
+          value: "1000.00",
+          currency: "RUB"
+        },
+        confirmation: {
+          type: "redirect",
+          return_url: window.location.origin + "/subscription"
+        },
+        description: "Bybit Signal Sniper - Premium подписка (1 месяц)",
+        metadata: {
+          userId: user.id
+        }
+      };
+      
+      // 2. В реальном приложении отправили бы запрос на сервер, который использует API ЮMoney
+      // fetch('/api/create-payment', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(paymentData)
+      // }).then(res => res.json()).then(data => {
+      //   // Редирект на страницу оплаты ЮMoney
+      //   window.location.href = data.confirmation_url;
+      // });
+      
+      // Для демонстрации имитируем успешную инициализацию платежа
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // В реальном приложении здесь был бы редирект на страницу оплаты Юмани
-      // Для демонстрации просто вызываем коллбэк успешной инициализации
       onPaymentInitiated();
       
       toast.success("Перенаправление на страницу оплаты Юмани...");
@@ -79,11 +103,23 @@ const YooMoneyPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () =>
           Безопасный платеж с шифрованием данных
         </p>
       </div>
+      
+      <div className="text-xs text-muted-foreground border-t pt-4 border-muted-foreground/20">
+        <p>
+          Для интеграции с ЮMoney в реальном приложении требуется:
+        </p>
+        <ol className="list-decimal list-inside space-y-1 mt-2">
+          <li>Зарегистрироваться как бизнес в ЮMoney.</li>
+          <li>Получить ключи доступа к API ЮMoney.</li>
+          <li>Использовать серверный компонент для создания платежей через API ЮMoney.</li>
+          <li>Обрабатывать колбэки от ЮMoney для подтверждения платежей.</li>
+        </ol>
+      </div>
     </div>
   );
 };
 
-// Компонент формы оплаты банковской картой
+// Компонент формы оплаты банковской картой с улучшенной документацией
 const CardPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => void }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
@@ -94,6 +130,29 @@ const CardPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => voi
     setIsProcessing(true);
     
     try {
+      // В реальном приложении здесь был бы код запроса к API платежной системы
+      // Примерная схема для интеграции:
+      
+      // 1. Формируем данные для платежа
+      const paymentData = {
+        amount: 1000,
+        currency: "RUB",
+        description: "Bybit Signal Sniper - Premium подписка (1 месяц)",
+        customer: {
+          email: user.email
+        },
+        returnUrl: window.location.origin + "/subscription"
+      };
+      
+      // 2. Отправка запроса на API платежной системы (через серверную часть)
+      // const response = await fetch('/api/create-card-payment', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(paymentData)
+      // });
+      // const data = await response.json();
+      // window.location.href = data.paymentUrl;
+      
       // Имитация запроса к API
       await new Promise(resolve => setTimeout(resolve, 1500));
       

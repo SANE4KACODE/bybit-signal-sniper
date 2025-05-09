@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import SavedSignals from "./pages/SavedSignals";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
+import Terms from "./pages/Terms";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/saved-signals" element={<SavedSignals />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/subscription" element={<Subscription />} />
+            <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
