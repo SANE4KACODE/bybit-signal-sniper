@@ -1,6 +1,5 @@
-
 import { MarketData, Signal, SignalType, TimeFrame } from "@/types";
-import { determineSignalStrength } from "@/utils/signalUtils";
+import { determineSignalStrength } from "@/utils/signals/determineSignalStrength";
 
 const SYMBOLS = [
   'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'AVAXUSDT',
