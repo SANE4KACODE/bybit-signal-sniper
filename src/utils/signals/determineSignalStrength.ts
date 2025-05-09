@@ -2,8 +2,10 @@
 import { Signal, SignalStrength } from "@/types";
 import { evaluateAdvancedIndicators } from './determineSignalStrengthPart2';
 import { evaluateVolumeIndicators } from './determineSignalStrengthPart3';
+import { evaluateOscillatorsIndicators } from './determineSignalStrengthPart4';
+import { evaluateSpecialIndicators } from './determineSignalStrengthPart5';
 
-// Determine signal strength based on technical indicators
+// Определение силы сигнала на основе технических индикаторов
 export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength => {
   if (!signal.indicators) return 'MODERATE';
   
@@ -18,10 +20,10 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     obv
   } = signal.indicators;
   
-  // Count confirming indicators
+  // Подсчет подтверждающих факторов
   let confirmingFactors = 0;
   
-  // RSI analysis
+  // RSI анализ
   if (rsi !== undefined) {
     if ((signal.signalType === 'LONG' && rsi < 30) || 
         (signal.signalType === 'SHORT' && rsi > 70)) {
@@ -29,7 +31,7 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // MACD analysis
+  // MACD анализ
   if (macd) {
     if ((signal.signalType === 'LONG' && macd.histogram > 0 && macd.value > macd.signal) || 
         (signal.signalType === 'SHORT' && macd.histogram < 0 && macd.value < macd.signal)) {
@@ -37,7 +39,7 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // Bollinger Bands analysis
+  // Bollinger Bands анализ
   if (bollingerBands && signal.price) {
     if ((signal.signalType === 'LONG' && signal.price <= bollingerBands.lower) || 
         (signal.signalType === 'SHORT' && signal.price >= bollingerBands.upper)) {
@@ -45,7 +47,7 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // Moving Averages analysis
+  // Moving Averages анализ
   if (movingAverages && signal.price) {
     if (signal.signalType === 'LONG') {
       if (signal.price > movingAverages.ema50 && movingAverages.ema20 > movingAverages.ema50) {
@@ -64,7 +66,7 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // Open Interest analysis
+  // Open Interest анализ
   if (signal.openInterestChange) {
     if ((signal.signalType === 'LONG' && signal.openInterestChange > 5) || 
         (signal.signalType === 'SHORT' && signal.openInterestChange < -5)) {
@@ -72,7 +74,7 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // Stochastic analysis
+  // Stochastic анализ
   if (stochastic) {
     if ((signal.signalType === 'LONG' && stochastic.k < 20 && stochastic.k > stochastic.d) ||
         (signal.signalType === 'SHORT' && stochastic.k > 80 && stochastic.k < stochastic.d)) {
@@ -80,14 +82,14 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // ATR (Average True Range) analysis
+  // ATR (Average True Range) анализ
   if (atr && atr.value && atr.average) {
     if (atr.value > atr.average * 1.5) {
-      confirmingFactors += 1; // High volatility can confirm potential trend changes
+      confirmingFactors += 1; // Высокая волатильность может подтвердить потенциальные изменения тренда
     }
   }
   
-  // ADX (Average Directional Index) analysis
+  // ADX (Average Directional Index) анализ
   if (adx) {
     if (adx.value > 25) {
       if ((signal.signalType === 'LONG' && adx.plusDI > adx.minusDI) ||
@@ -97,7 +99,7 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // OBV (On-Balance Volume) analysis
+  // OBV (On-Balance Volume) анализ
   if (obv && obv.current && obv.previous) {
     if ((signal.signalType === 'LONG' && obv.current > obv.previous) ||
         (signal.signalType === 'SHORT' && obv.current < obv.previous)) {
@@ -105,13 +107,15 @@ export const determineSignalStrength = (signal: Partial<Signal>): SignalStrength
     }
   }
   
-  // Add scores from other indicator groups
+  // Добавляем оценки от других групп индикаторов
   confirmingFactors += evaluateAdvancedIndicators(signal);
   confirmingFactors += evaluateVolumeIndicators(signal);
+  confirmingFactors += evaluateOscillatorsIndicators(signal);
+  confirmingFactors += evaluateSpecialIndicators(signal);
   
-  // Determine strength based on confirming factors
-  // With 20+ indicators, we adjust the thresholds
-  if (confirmingFactors >= 15) return 'STRONG';
-  if (confirmingFactors >= 10) return 'MODERATE';
+  // Определение силы на основе подтверждающих факторов
+  // С 25+ индикаторами мы повышаем пороговые значения
+  if (confirmingFactors >= 25) return 'STRONG';
+  if (confirmingFactors >= 15) return 'MODERATE';
   return 'WEAK';
 };

@@ -4,9 +4,153 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, ArrowLeft, CreditCard } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle, ArrowLeft, CreditCard, Wallet, Shield } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+// Компонент формы оплаты через Юмани
+const YooMoneyPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => void }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
+
+  const handleYooMoneyPayment = async () => {
+    if (!user) return;
+    
+    setIsProcessing(true);
+    
+    try {
+      // В реальном приложении здесь был бы код запроса к серверному API для создания платежа
+      // Для демонстрации мы имитируем успешную инициализацию платежа
+      
+      // Имитация запроса к API
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // В реальном приложении здесь был бы редирект на страницу оплаты Юмани
+      // Для демонстрации просто вызываем коллбэк успешной инициализации
+      onPaymentInitiated();
+      
+      toast.success("Перенаправление на страницу оплаты Юмани...");
+    } catch (error) {
+      console.error("YooMoney payment error:", error);
+      toast.error("Произошла ошибка при инициализации платежа");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-muted/20 p-4 rounded-md">
+        <h3 className="font-medium mb-2">Оплата через ЮMoney</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Безопасная оплата через платежную систему ЮMoney (бывший Яндекс.Деньги)
+        </p>
+        
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between text-sm">
+            <span>Премиум подписка (1 месяц)</span>
+            <span className="font-medium">1000₽</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Комиссия сервиса</span>
+            <span className="font-medium">0₽</span>
+          </div>
+          <div className="border-t border-muted-foreground/20 my-2"></div>
+          <div className="flex justify-between">
+            <span>Итого к оплате:</span>
+            <span className="font-bold">1000₽</span>
+          </div>
+        </div>
+      </div>
+      
+      <Button 
+        onClick={handleYooMoneyPayment} 
+        disabled={isProcessing}
+        className="w-full bg-[#8b3ffd] hover:bg-[#7426fc]"
+      >
+        {isProcessing ? "Подготовка платежа..." : "Оплатить через ЮMoney"}
+        <Wallet className="ml-2 h-4 w-4" />
+      </Button>
+      
+      <div className="text-xs text-center text-muted-foreground">
+        <p className="flex items-center justify-center">
+          <Shield className="h-3 w-3 mr-1" />
+          Безопасный платеж с шифрованием данных
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// Компонент формы оплаты банковской картой
+const CardPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => void }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
+
+  const handleCardPayment = async () => {
+    if (!user) return;
+    
+    setIsProcessing(true);
+    
+    try {
+      // Имитация запроса к API
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      onPaymentInitiated();
+      
+      toast.success("Перенаправление на страницу оплаты...");
+    } catch (error) {
+      console.error("Card payment error:", error);
+      toast.error("Произошла ошибка при инициализации платежа");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-muted/20 p-4 rounded-md">
+        <h3 className="font-medium mb-2">Оплата банковской картой</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Поддерживаются карты Visa, Mastercard, МИР
+        </p>
+        
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between text-sm">
+            <span>Премиум подписка (1 месяц)</span>
+            <span className="font-medium">1000₽</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span>Комиссия сервиса</span>
+            <span className="font-medium">0₽</span>
+          </div>
+          <div className="border-t border-muted-foreground/20 my-2"></div>
+          <div className="flex justify-between">
+            <span>Итого к оплате:</span>
+            <span className="font-bold">1000₽</span>
+          </div>
+        </div>
+      </div>
+      
+      <Button 
+        onClick={handleCardPayment} 
+        disabled={isProcessing}
+        className="w-full"
+      >
+        {isProcessing ? "Подготовка платежа..." : "Оплатить картой"}
+        <CreditCard className="ml-2 h-4 w-4" />
+      </Button>
+      
+      <div className="text-xs text-center text-muted-foreground">
+        <p className="flex items-center justify-center">
+          <Shield className="h-3 w-3 mr-1" />
+          Безопасный платеж по стандарту PCI DSS
+        </p>
+      </div>
+    </div>
+  );
+};
 
 const Subscription = () => {
   const navigate = useNavigate();
@@ -18,17 +162,11 @@ const Subscription = () => {
     document.title = "Подписка | Bybit Signal Sniper";
   }, []);
   
-  const handleSubscribe = async () => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
-    
+  const handlePaymentInitiated = async () => {
     setIsLoading(true);
     
     try {
-      // В реальном приложении здесь был бы код для интеграции с платежным шлюзом
-      // и обработки платежа. Для демо мы просто имитируем успешную подписку.
+      // В реальном приложении здесь был бы код для обработки успешной инициализации платежа
       
       setTimeout(() => {
         toast.success("Подписка оформлена успешно!");
@@ -77,7 +215,7 @@ const Subscription = () => {
                     <ul className="space-y-2">
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
-                        <span>Высокоточные сигналы с использованием 20+ индикаторов</span>
+                        <span>Высокоточные сигналы с использованием 25+ индикаторов</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-2" />
@@ -147,7 +285,7 @@ const Subscription = () => {
                     <ul className="space-y-2">
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                        <span>Высокоточные сигналы с использованием 20+ индикаторов</span>
+                        <span>Высокоточные сигналы с использованием 25+ индикаторов</span>
                       </li>
                       <li className="flex items-center">
                         <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
@@ -173,14 +311,20 @@ const Subscription = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    onClick={handleSubscribe} 
-                    disabled={isLoading} 
-                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
-                  >
-                    {isLoading ? "Обработка..." : "Оформить подписку"}
-                    <CreditCard className="ml-2 h-4 w-4" />
-                  </Button>
+                  <Tabs defaultValue="yoomoney" className="w-full">
+                    <TabsList className="grid grid-cols-2 mb-4">
+                      <TabsTrigger value="yoomoney">ЮMoney</TabsTrigger>
+                      <TabsTrigger value="card">Банковская карта</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="yoomoney">
+                      <YooMoneyPaymentForm onPaymentInitiated={handlePaymentInitiated} />
+                    </TabsContent>
+                    
+                    <TabsContent value="card">
+                      <CardPaymentForm onPaymentInitiated={handlePaymentInitiated} />
+                    </TabsContent>
+                  </Tabs>
                 </CardFooter>
               </Card>
               
