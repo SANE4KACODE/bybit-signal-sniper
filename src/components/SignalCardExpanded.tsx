@@ -24,7 +24,7 @@ const SignalCardExpanded = ({ signal, onClose, onSave }: SignalCardExpandedProps
   const [showTechnicals, setShowTechnicals] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
   
-  const date = new Date(signal.timestamp);
+  const date = new Date(signal.timestamp || 0);
   const timeAgo = formatDistanceToNow(date, { addSuffix: true, locale: ru });
   const timeString = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   
@@ -80,11 +80,11 @@ const SignalCardExpanded = ({ signal, onClose, onSave }: SignalCardExpandedProps
                       {signal.signalType} {getStrengthIndicator(signal.strength)}
                     </span>
                     <p className="text-muted-foreground text-sm">
-                      {getStrengthDescription(signal.strength)}
+                      {getStrengthDescription(signal.strength || 'MODERATE')}
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-mono">{formatPrice(signal.price)}</div>
+                    <div className="text-2xl font-mono">{formatPrice(signal.price || 0)}</div>
                   </div>
                 </div>
                 
@@ -93,8 +93,8 @@ const SignalCardExpanded = ({ signal, onClose, onSave }: SignalCardExpandedProps
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-muted/20 p-2 rounded">
                       <div className="text-sm text-muted-foreground">Изменение % OI:</div>
-                      <div className={`font-medium ${signal.openInterestChange > 0 ? 'text-success' : 'text-warning'}`}>
-                        {signal.openInterestChange.toFixed(2)}%
+                      <div className={`font-medium ${signal.openInterestChange && signal.openInterestChange > 0 ? 'text-success' : 'text-warning'}`}>
+                        {(signal.openInterestChange || 0).toFixed(2)}%
                       </div>
                     </div>
                     {signal.indicators.rsi && (

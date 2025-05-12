@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Signal } from "@/types";
+import { Signal, SignalType, TimeFrame, SignalStrength } from "@/types";
 import SignalCard from "@/components/SignalCard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -34,11 +34,11 @@ const SavedSignals = () => {
           id: item.signal_id,
           symbol: item.symbol,
           timestamp: item.timestamp,
-          signalType: item.signal_type,
-          strength: item.strength,
+          signalType: item.signal_type as SignalType,
+          strength: item.strength as SignalStrength,
           price: Number(item.price),
           openInterestChange: 0, // Default value
-          timeframe: item.timeframe,
+          timeframe: item.timeframe as TimeFrame,
           // Add required fields for Signal type
           entryPrice: Number(item.price),
           takeProfit: Number(item.price) * (item.signal_type === 'LONG' ? 1.05 : 0.95),

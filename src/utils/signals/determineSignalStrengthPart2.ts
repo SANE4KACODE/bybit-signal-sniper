@@ -25,7 +25,7 @@ export const evaluateAdvancedIndicators = (signal: Partial<Signal>): number => {
   let confirmingFactors = 0;
   
   // Ichimoku Cloud analysis
-  if (ichimoku) {
+  if (ichimoku && ichimoku.cloud) {
     if (signal.signalType === 'LONG') {
       if (signal.price && signal.price > ichimoku.cloud.top) {
         confirmingFactors += 1;
@@ -100,7 +100,7 @@ export const evaluateAdvancedIndicators = (signal: Partial<Signal>): number => {
   }
   
   // DMI (Directional Movement Index) analysis 
-  if (dmi) {
+  if (dmi && dmi.plusDI !== undefined && dmi.minusDI !== undefined && dmi.adx !== undefined) {
     if ((signal.signalType === 'LONG' && dmi.plusDI > dmi.minusDI && dmi.adx > 20) ||
         (signal.signalType === 'SHORT' && dmi.plusDI < dmi.minusDI && dmi.adx > 20)) {
       confirmingFactors += 1;

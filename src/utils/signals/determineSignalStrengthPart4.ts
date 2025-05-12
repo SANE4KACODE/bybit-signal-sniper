@@ -14,7 +14,7 @@ export const evaluateOscillatorsIndicators = (signal: Partial<Signal>): number =
   let confirmingFactors = 0;
   
   // Gator Oscillator анализ (Bill Williams)
-  if (gatorOscillator) {
+  if (gatorOscillator && gatorOscillator.upper !== undefined && gatorOscillator.lower !== undefined) {
     if ((signal.signalType === 'LONG' && gatorOscillator.upper > 0 && gatorOscillator.lower > 0) ||
         (signal.signalType === 'SHORT' && gatorOscillator.upper < 0 && gatorOscillator.lower < 0)) {
       confirmingFactors += 1;

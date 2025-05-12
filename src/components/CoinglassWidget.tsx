@@ -1,19 +1,32 @@
+
 import React, { useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CoinglassWidgetProps {
-  symbol: string;
-  timeFrame: string;
+  symbol?: string;
+  timeFrame?: string;
+  type?: "funding" | "liquidations" | "openInterest" | "longShortRatio" | "all";
+  title?: string;
+  height?: number;
 }
 
-const CoinglassWidget: React.FC<CoinglassWidgetProps> = ({ symbol, timeFrame }) => {
-  const [dataType, setDataType] = useState<"funding" | "liquidations" | "openInterest" | "longShortRatio">("funding");
+const CoinglassWidget: React.FC<CoinglassWidgetProps> = ({ 
+  symbol = "BTC", 
+  timeFrame = "1h",
+  type = "funding",
+  title,
+  height = 300
+}) => {
+  const [dataType, setDataType] = useState<"funding" | "liquidations" | "openInterest" | "longShortRatio">(
+    type === "all" ? "funding" : type as any
+  );
 
   // Function to generate the embed URL based on the selected data type
   const getEmbedURL = () => {
-    const coinglassSymbol = symbol.replace(/USDT|BUSD|USD/g, '').replace(':', '');
+    const coinglassSymbol = symbol?.replace(/USDT|BUSD|USD/g, '').replace(':', '');
     const timeframeMapping: { [key: string]: string } = {
       '1m': '1m',
+      '3m': '3m',
       '5m': '5m',
       '15m': '15m',
       '30m': '30m',
@@ -53,26 +66,29 @@ const CoinglassWidget: React.FC<CoinglassWidgetProps> = ({ symbol, timeFrame }) 
 
   return (
     <div className="w-full">
-      <div className="flex justify-end mb-2">
-        <Select onValueChange={handleDataTypeChange}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select data type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="funding">Funding Rate</SelectItem>
-            <SelectItem value="liquidations">Liquidations</SelectItem>
-            <SelectItem value="openInterest">Open Interest</SelectItem>
-            <SelectItem value="longShortRatio">Long/Short Ratio</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {title && <h3 className="text-lg font-medium mb-2">{title}</h3>}
+      {type === "all" && (
+        <div className="flex justify-end mb-2">
+          <Select onValueChange={handleDataTypeChange as any}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select data type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="funding">Funding Rate</SelectItem>
+              <SelectItem value="liquidations">Liquidations</SelectItem>
+              <SelectItem value="openInterest">Open Interest</SelectItem>
+              <SelectItem value="longShortRatio">Long/Short Ratio</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <iframe
         src={getEmbedURL()}
         title="Coinglass Widget"
         width="100%"
-        height="300px"
+        height={`${height}px`}
         frameBorder="0"
-        allowtransparency="true"
+        allowTransparency="true"
         sandbox="allow-popups allow-scripts allow-same-origin allow-forms"
       />
     </div>
