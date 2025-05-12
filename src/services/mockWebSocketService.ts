@@ -242,11 +242,8 @@ export function createMockWebSocketService(callbacks: {
   };
 }
 
-// Сохраняем существующие экспорты
-export { createMockSignal, createMockSignals };
-
 // Функция для создания мок-сигнала с исправленными типами
-export const createMockSignal = (): any => {
+export const createMockSignal = (): Signal => {
   const signalType = generateSignalType();
   const asset = generateAsset();
   const timeFrame = generateTimeFrame();
@@ -259,15 +256,25 @@ export const createMockSignal = (): any => {
     timeframe: timeFrame,
     signalType: signalType,
     price: price,
+    entryPrice: price,
+    takeProfit: signalType === 'LONG' ? price * 1.05 : price * 0.95,
+    stopLoss: signalType === 'LONG' ? price * 0.97 : price * 1.03,
+    leverage: Math.ceil(randomNumber(1, 10)),
     indicators: indicators,
     timestamp: Date.now(),
-    strength: Math.random() > 0.7 ? 'STRONG' as SignalStrength : Math.random() > 0.5 ? 'MODERATE' as SignalStrength : 'WEAK' as SignalStrength
+    status: 'ACTIVE' as const,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    userId: 'mock-user-id',
+    strength: Math.random() > 0.7 ? 'STRONG' as SignalStrength : 
+              Math.random() > 0.5 ? 'MODERATE' as SignalStrength : 
+              'WEAK' as SignalStrength
   };
 };
 
 // Функция для создания массива мок-сигналов
-export const createMockSignals = (count: number): any[] => {
-  const signals: any[] = [];
+export const createMockSignals = (count: number): Signal[] => {
+  const signals: Signal[] = [];
   for (let i = 0; i < count; i++) {
     signals.push(createMockSignal());
   }
