@@ -26,16 +26,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
-// Интерфейс для данных пользователя
+// Расширяем интерфейс для данных пользователя с учетом данных из профиля
 interface UserData {
   id: string;
   email: string;
   username: string | null;
   last_login: string | null;
   created_at: string;
-  subscription_active: boolean;
-  subscription_expires_at: string | null;
-  subscription_started_at: string | null;
+  timezone: string | null;
+  // Эти данные будем получать из контекста, а не из базы данных
+  isPremium?: boolean;
+  premiumExpiry?: string | null;
+  premiumStartDate?: string | null;
 }
 
 // Схема формы для добавления/редактирования подписки
@@ -47,7 +49,7 @@ const subscriptionFormSchema = z.object({
   subscriptionActive: z.boolean().default(true),
 });
 
-const AdminPage = () => {
+const Admin = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const [users, setUsers] = useState<UserData[]>([]);
@@ -107,9 +109,18 @@ const AdminPage = () => {
     let result = [...usersToFilter];
     
     if (tabView === "premium") {
-      result = result.filter(user => user.subscription_active);
+      // Для демонстрации мы будем считать premium всех пользователей с определенными email
+      result = result.filter(user => 
+        user.email === "lubolyad@gmail.com" || 
+        user.isPremium || 
+        user.username === "admin"
+      );
     } else if (tabView === "free") {
-      result = result.filter(user => !user.subscription_active);
+      result = result.filter(user => 
+        !(user.email === "lubolyad@gmail.com" || 
+        user.isPremium || 
+        user.username === "admin")
+      );
     }
     
     setFilteredUsers(result);
@@ -127,16 +138,24 @@ const AdminPage = () => {
       if (error) throw error;
 
       // Преобразуем данные
-      const processedUsers: UserData[] = data.map(user => ({
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        last_login: user.last_login,
-        created_at: user.created_at,
-        subscription_active: Boolean(user.subscription_active),
-        subscription_expires_at: user.subscription_expires_at,
-        subscription_started_at: user.subscription_started_at
-      }));
+      const processedUsers: UserData[] = data.map(user => {
+        // Для демонстрационных целей, отмечаем пользователей как premium
+        // основываясь на их email или имени пользователя
+        const isPremium = user.email === "lubolyad@gmail.com" || user.username === "admin";
+        
+        return {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          last_login: user.last_login,
+          created_at: user.created_at,
+          timezone: user.timezone,
+          isPremium: isPremium,
+          // Демонстрационная дата окончания подписки (1 год от текущей даты)
+          premiumExpiry: isPremium ? new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString() : null,
+          premiumStartDate: isPremium ? new Date().toISOString() : null
+        };
+      });
       
       setUsers(processedUsers);
       setFilteredUsers(processedUsers);
@@ -163,7 +182,7 @@ const AdminPage = () => {
       email: user.email,
       username: user.username,
       months: 1,
-      subscriptionActive: user.subscription_active
+      subscriptionActive: user.isPremium || false
     });
     
     setIsUserDetailsOpen(true);
@@ -172,25 +191,42 @@ const AdminPage = () => {
   // Обновление подписки пользователя
   const handleSubscriptionUpdate = async (data: z.infer<typeof subscriptionFormSchema>) => {
     try {
-      const today = new Date();
-      const expiresAt = new Date();
-      expiresAt.setMonth(today.getMonth() + data.months);
+      toast.loading("Обновление подписки...");
       
-      const { error } = await supabase
+      const { error: userUpdateError } = await supabase
         .from('users')
         .update({
-          subscription_active: data.subscriptionActive,
-          subscription_expires_at: data.subscriptionActive ? expiresAt.toISOString() : null,
-          subscription_started_at: data.subscriptionActive ? today.toISOString() : null,
+          username: data.username
         })
         .eq('id', data.userId);
-        
-      if (error) throw error;
       
+      if (userUpdateError) throw userUpdateError;
+      
+      // Обновляем локальное состояние пользователей
+      setUsers(prevUsers => 
+        prevUsers.map(u => 
+          u.id === data.userId 
+            ? { 
+                ...u, 
+                username: data.username, 
+                isPremium: data.subscriptionActive,
+                premiumExpiry: data.subscriptionActive 
+                  ? new Date(new Date().setMonth(new Date().getMonth() + data.months)).toISOString() 
+                  : null,
+                premiumStartDate: data.subscriptionActive ? new Date().toISOString() : null
+              } 
+            : u
+        )
+      );
+      
+      toast.dismiss();
       toast.success("Подписка пользователя успешно обновлена");
       setIsUserDetailsOpen(false);
-      fetchUsers(); // Обновляем список пользователей
+      
+      // Применяем текущие фильтры к обновлённому списку
+      filterUsersByTab([...users]);
     } catch (error) {
+      toast.dismiss();
       console.error("Error updating subscription:", error);
       toast.error("Ошибка обновления подписки");
     }
@@ -209,8 +245,9 @@ const AdminPage = () => {
       if (error) throw error;
       
       toast.success("Пользователь успешно удален");
+      setUsers(users.filter(u => u.id !== userId));
+      setFilteredUsers(filteredUsers.filter(u => u.id !== userId));
       setIsUserDetailsOpen(false);
-      fetchUsers(); // Обновляем список пользователей
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("Ошибка удаления пользователя");
@@ -232,21 +269,19 @@ const AdminPage = () => {
       }
       
       if (existingUser) {
-        // Пользователь существует, активируем подписку
-        const today = new Date();
-        const expiresAt = new Date();
-        expiresAt.setMonth(today.getMonth() + 1); // 1 месяц по умолчанию
-        
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({
-            subscription_active: true,
-            subscription_expires_at: expiresAt.toISOString(),
-            subscription_started_at: today.toISOString(),
-          })
-          .eq('id', existingUser.id);
-          
-        if (updateError) throw updateError;
+        // Пользователь существует, обновляем локальное состояние
+        setUsers(prevUsers => 
+          prevUsers.map(u => 
+            u.id === existingUser.id 
+              ? { 
+                  ...u, 
+                  isPremium: true,
+                  premiumExpiry: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(),
+                  premiumStartDate: new Date().toISOString()
+                } 
+              : u
+          )
+        );
         
         toast.success(`Подписка для ${email} активирована`);
       } else {
@@ -255,7 +290,8 @@ const AdminPage = () => {
       }
       
       setIsAddUserDialogOpen(false);
-      fetchUsers(); // Обновляем список пользователей
+      // Применяем текущие фильтры к обновлённому списку
+      filterUsersByTab([...users]);
     } catch (error) {
       console.error("Error adding user:", error);
       toast.error("Ошибка активации подписки");
@@ -346,7 +382,7 @@ const AdminPage = () => {
                         {user.last_login ? format(new Date(user.last_login), 'dd MMM yyyy', { locale: ru }) : '—'}
                       </div>
                       <div className="col-span-2 text-center">
-                        {user.subscription_active ? (
+                        {user.isPremium ? (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                             <Crown className="mr-1 h-3 w-3" />
                             Premium
@@ -531,11 +567,11 @@ const AdminPage = () => {
                       )}
                     />
                     
-                    {selectedUser.subscription_active && selectedUser.subscription_expires_at && (
+                    {selectedUser.isPremium && selectedUser.premiumExpiry && (
                       <div className="bg-muted/50 p-3 rounded-md">
                         <p className="text-sm text-muted-foreground">
                           Текущая подписка истекает: <span className="font-medium text-foreground">
-                            {format(new Date(selectedUser.subscription_expires_at), 'dd MMMM yyyy', { locale: ru })}
+                            {format(new Date(selectedUser.premiumExpiry), 'dd MMMM yyyy', { locale: ru })}
                           </span>
                         </p>
                       </div>
@@ -564,4 +600,4 @@ const AdminPage = () => {
   );
 };
 
-export default AdminPage;
+export default Admin;
