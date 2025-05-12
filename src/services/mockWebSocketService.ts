@@ -1,4 +1,3 @@
-
 import { MarketData, Signal, SignalStrength, SignalType, TimeFrame, WebSocketStatus } from "@/types";
 
 // Функция для генерации случайного числа в заданном диапазоне
@@ -32,6 +31,7 @@ const generateAsset = () => {
 // Функция для генерации базовых индикаторов
 const generateBaseIndicators = (signalType: SignalType, price: number) => {
   const atrValue = randomPrice(0.01, 0.05) * price;
+  const vwapValue = price * randomNumber(0.99, 1.01);
   
   return {
     rsi: randomNumber(30, 70),
@@ -63,7 +63,9 @@ const generateBaseIndicators = (signalType: SignalType, price: number) => {
     },
     cci: randomNumber(-100, 100),
     mfi: randomNumber(20, 80),
-    vwap: price * randomNumber(0.99, 1.01),
+    vwap: {
+      value: vwapValue
+    },
     pivot: {
       r3: price * 1.15,
       r2: price * 1.1,
@@ -219,7 +221,7 @@ export function createMockWebSocketService(callbacks: {
           callbacks.onMarketData(createRandomMarketData());
         }, 5000);
         
-        // Отправляем сигналы случайно каждые 10-30 секунд
+        // Отправляем сигналы случа��но каждые 10-30 секунд
         signalInterval = setInterval(() => {
           if (Math.random() > 0.3) { // 70% шанс отправки сигнала
             callbacks.onSignal(createRandomSignal());
