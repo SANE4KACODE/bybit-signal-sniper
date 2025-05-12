@@ -88,7 +88,7 @@ const CoinglassWidget: React.FC<CoinglassWidgetProps> = ({
         width="100%"
         height={`${height}px`}
         frameBorder="0"
-        allowTransparency="true"
+        allowTransparency={true}
         sandbox="allow-popups allow-scripts allow-same-origin allow-forms"
       />
     </div>

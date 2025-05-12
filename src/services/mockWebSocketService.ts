@@ -31,6 +31,8 @@ const generateAsset = () => {
 
 // Функция для генерации базовых индикаторов
 const generateBaseIndicators = (signalType: SignalType, price: number) => {
+  const atrValue = randomPrice(0.01, 0.05) * price;
+  
   return {
     rsi: randomNumber(30, 70),
     macd: {
@@ -55,7 +57,10 @@ const generateBaseIndicators = (signalType: SignalType, price: number) => {
     },
     adx: randomNumber(20, 50),
     obv: randomNumber(-10000, 10000),
-    atr: randomPrice(0.01, 0.05) * price,
+    atr: {
+      value: atrValue,
+      average: atrValue * 0.9,
+    },
     cci: randomNumber(-100, 100),
     mfi: randomNumber(20, 80),
     vwap: price * randomNumber(0.99, 1.01),
@@ -119,7 +124,9 @@ const generateIndicators = (signalType: SignalType, price: number) => {
     
     // Добавляем новые индикаторы из Билла Вильямса и др.
     gatorOscillator: {
-      value: signalType === 'LONG' ? randomPrice(0.1, 2) : randomPrice(-2, -0.1)
+      value: signalType === 'LONG' ? randomPrice(0.1, 2) : randomPrice(-2, -0.1),
+      upper: signalType === 'LONG' ? randomPrice(0.1, 2) : randomPrice(-2, -0.1),
+      lower: signalType === 'LONG' ? randomPrice(0.1, 2) : randomPrice(-2, -0.1)
     },
     elderRayIndex: {
       bullPower: signalType === 'LONG' ? randomPrice(1, 3) : randomPrice(-1, 1),
