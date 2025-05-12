@@ -8,13 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Bookmark, LogOut, Settings, CreditCard, Crown } from "lucide-react";
+import { User, Bookmark, LogOut, Settings, CreditCard, Crown, UserCog, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 export const UserMenu = () => {
-  const { user, profile, signOut, isPremium } = useAuth();
+  const { user, profile, signOut, isPremium, isAdmin } = useAuth();
 
   if (!user) {
     return (
@@ -34,11 +34,22 @@ export const UserMenu = () => {
           {isPremium && (
             <Badge variant="outline" className="ml-1 bg-primary/10 text-primary text-[10px] py-0">Premium</Badge>
           )}
+          {isAdmin && (
+            <Badge variant="outline" className="ml-1 bg-amber-500/10 text-amber-500 text-[10px] py-0">Admin</Badge>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Мой аккаунт</DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link to="/admin" className="flex w-full cursor-pointer items-center">
+              <UserCog className="mr-2 h-4 w-4" />
+              <span>Админ-панель</span>
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem asChild>
           <Link to="/subscription" className="flex w-full cursor-pointer items-center">
             <CreditCard className="mr-2 h-4 w-4" />
@@ -59,6 +70,12 @@ export const UserMenu = () => {
             <Settings className="mr-2 h-4 w-4" />
             <span>Настройки</span>
           </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a href="https://t.me/sane4kakryt" target="_blank" rel="noopener noreferrer" className="flex w-full cursor-pointer items-center">
+            <MessageCircle className="mr-2 h-4 w-4" />
+            <span>Поддержка в Telegram</span>
+          </a>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut} className="text-destructive">

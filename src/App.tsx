@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import SavedSignals from "./pages/SavedSignals";
 import Settings from "./pages/Settings";
 import Subscription from "./pages/Subscription";
 import Terms from "./pages/Terms";
+import AdminPage from "./pages/AdminPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
 
@@ -30,7 +30,7 @@ const App = () => (
               <Route path="/saved-signals" element={<SavedSignals />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/subscription" element={<Subscription />} />
-              <Route path="/terms" element={<Terms />} />
+              <Route path="/admin" element={<AdminPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

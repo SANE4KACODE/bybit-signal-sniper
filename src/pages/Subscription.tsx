@@ -1,13 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, ArrowLeft, CreditCard, Wallet, Shield } from "lucide-react";
+import { CheckCircle, ArrowLeft, CreditCard, Wallet, Shield, MessageCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Компонент формы оплаты через Юмани с улучшенной документацией
 const YooMoneyPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => void }) => {
@@ -211,11 +211,105 @@ const CardPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => voi
   );
 };
 
+// Новый компонент для оплаты через Telegram
+const TelegramPaymentForm = ({ onPaymentInitiated }: { onPaymentInitiated: () => void }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { user } = useAuth();
+
+  const openTelegramDialog = () => {
+    setIsDialogOpen(true);
+  };
+
+  return (
+    <>
+      <div className="space-y-4">
+        <div className="bg-muted/20 p-4 rounded-md">
+          <h3 className="font-medium mb-2">Оплата через Telegram</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Свяжитесь с менеджером в Telegram для получения индивидуальных условий
+          </p>
+          
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between text-sm">
+              <span>Премиум подписка (1 месяц)</span>
+              <span className="font-medium">1000₽</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Возможна персональная скидка</span>
+              <span className="font-medium text-green-500">до -20%</span>
+            </div>
+            <div className="border-t border-muted-foreground/20 my-2"></div>
+            <div className="flex justify-between">
+              <span>Итого к оплате:</span>
+              <span className="font-bold">от 800₽</span>
+            </div>
+          </div>
+        </div>
+        
+        <Button 
+          onClick={openTelegramDialog} 
+          className="w-full bg-blue-500 hover:bg-blue-600"
+        >
+          Связаться в Telegram
+          <MessageCircle className="ml-2 h-4 w-4" />
+        </Button>
+        
+        <div className="text-xs text-center text-muted-foreground">
+          <p className="flex items-center justify-center">
+            <Shield className="h-3 w-3 mr-1" />
+            Безопасная оплата и персональные условия
+          </p>
+        </div>
+      </div>
+      
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Оплата через Telegram</DialogTitle>
+            <DialogDescription>
+              Свяжитесь с нашим менеджером для оформления подписки
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-md border border-blue-200 dark:border-blue-800">
+              <p className="mb-2 font-medium">Как оформить подписку через Telegram:</p>
+              <ol className="list-decimal list-inside space-y-2 text-sm">
+                <li>Перейдите по ссылке <a href="https://t.me/sane4kakryt" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 font-medium underline">@sane4kakryt</a></li>
+                <li>Отправьте сообщение с текстом "Подписка от {user?.email?.split('@')[0]}"</li>
+                <li>Менеджер свяжется с вами для предоставления реквизитов и активации подписки</li>
+                <li>После подтверждения оплаты, ваша подписка будет активирована</li>
+              </ol>
+            </div>
+            
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                Закрыть
+              </Button>
+              <Button 
+                className="bg-[#0088cc] hover:bg-[#0077b5]"
+                onClick={() => {
+                  window.open('https://t.me/sane4kakryt', '_blank');
+                  onPaymentInitiated();
+                }}
+              >
+                Открыть Telegram
+                <MessageCircle className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
 const Subscription = () => {
   const navigate = useNavigate();
   const { user, profile, isPremium } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [activeTab, setActiveTab] = useState("yoomoney");
   
   useEffect(() => {
     document.title = "Подписка | Bybit Signal Sniper";
@@ -296,11 +390,17 @@ const Subscription = () => {
                   </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex flex-col sm:flex-row gap-3">
                 <Button asChild variant="secondary">
                   <Link to="/">
                     Вернуться на главную
                   </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <a href="https://t.me/sane4kakryt" target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Техническая поддержка
+                  </a>
                 </Button>
               </CardFooter>
             </Card>
@@ -317,11 +417,17 @@ const Subscription = () => {
                   Ваша подписка будет активна в течение следующих 30 дней.
                 </p>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex flex-col sm:flex-row gap-3">
                 <Button variant="secondary" asChild>
                   <Link to="/">
                     Вернуться на главную
                   </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <a href="https://t.me/sane4kakryt" target="_blank" rel="noopener noreferrer">
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Техническая поддержка
+                  </a>
                 </Button>
               </CardFooter>
             </Card>
@@ -370,18 +476,23 @@ const Subscription = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Tabs defaultValue="yoomoney" className="w-full">
-                    <TabsList className="grid grid-cols-2 mb-4">
+                  <Tabs defaultValue="yoomoney" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+                    <TabsList className="grid grid-cols-3 mb-4">
                       <TabsTrigger value="yoomoney">ЮMoney</TabsTrigger>
-                      <TabsTrigger value="card">Банковская карта</TabsTrigger>
+                      <TabsTrigger value="card">Банк. карта</TabsTrigger>
+                      <TabsTrigger value="telegram">Telegram</TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="yoomoney">
+                    <TabsContent value="yoomoney" className="animate-in fade-in-50">
                       <YooMoneyPaymentForm onPaymentInitiated={handlePaymentInitiated} />
                     </TabsContent>
                     
-                    <TabsContent value="card">
+                    <TabsContent value="card" className="animate-in fade-in-50">
                       <CardPaymentForm onPaymentInitiated={handlePaymentInitiated} />
+                    </TabsContent>
+                    
+                    <TabsContent value="telegram" className="animate-in fade-in-50">
+                      <TelegramPaymentForm onPaymentInitiated={handlePaymentInitiated} />
                     </TabsContent>
                   </Tabs>
                 </CardFooter>
